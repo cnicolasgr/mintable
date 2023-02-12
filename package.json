@@ -6,7 +6,7 @@
     "bin": "./lib/scripts/cli.js",
     "preferGlobal": true,
     "publishConfig": {
-        "cnicolasgr:registry": "https://npm.pkg.github.com"
+        "@cnicolasgr:registry": "https://npm.pkg.github.com"
       },
     "scripts": {
         "build": "tsc",
