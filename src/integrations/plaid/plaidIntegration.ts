@@ -124,7 +124,9 @@ export class PlaidIntegration {
                         client_user_id: clientUserId
                     },
                     client_name: 'Mintable',
-                    products: ['transactions']
+                    products: ['transactions'],
+                    country_codes,
+                    language
                 }
                 if (req.body.access_token) {
                     options.access_token = req.body.access_token
