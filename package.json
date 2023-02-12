@@ -5,6 +5,9 @@
     "version": "2.0.3",
     "bin": "./lib/scripts/cli.js",
     "preferGlobal": true,
+    "publishConfig": {
+        "cnicolasgr:registry": "https://npm.pkg.github.com"
+      },
     "scripts": {
         "build": "tsc",
         "watch": "tsc --watch",
@@ -77,5 +80,5 @@
     "bugs": {
         "url": "https://github.com/kevinschaich/mintable/issues"
     },
-    "homepage": "https://github.com/kevinschaich/mintable#readme"
+    "homepage": "https://github.com/kevinschaich/mintable#readme",
 }
