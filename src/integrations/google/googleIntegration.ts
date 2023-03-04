@@ -176,11 +176,28 @@ export class GoogleIntegration {
             })
     }
 
+    public getRanges = (ranges: Range[]): Promise<sheets_v4.Schema$BatchGetValuesResponse> => {
+        const translatedRanges = this.translateRanges(ranges)
+        return this.sheets.values
+        .batchGet({
+            spreadsheetId: this.googleConfig.documentId,
+            ranges: translatedRanges
+        })
+        .then(res => {
+            logInfo(`Retrieved ${ranges.length} range(s): ${translatedRanges}.`, res.data)
+            return res.data
+        })
+        .catch(error => {
+            logError(`Error retrieveing ${ranges.length} range(s): ${translatedRanges}.`, error)
+            return {}
+        })
+    }
+
     public updateRanges = (dataRanges: DataRange[]): Promise<sheets_v4.Schema$BatchUpdateValuesResponse> => {
         const data = dataRanges.map(dataRange => ({
             range: this.translateRange(dataRange.range),
             values: dataRange.data
-        }))
+        }))       
         return this.sheets.values
             .batchUpdate({
                 spreadsheetId: this.googleConfig.documentId,
@@ -325,8 +342,25 @@ export class GoogleIntegration {
             start: `A1`,
             end: `${columnHeaders[columns.length > 0 ? columns.length - 1 : 1]}${rows.length + 1}`
         }
-        const data = [columns].concat(rows.map(row => this.getRowWithDefaults(row, columns)))
+        let data = [columns].concat(rows.map(row => this.getRowWithDefaults(row, columns)))
 
+        let currentSheetData = (await this.getRanges([range])).valueRanges[0].values;
+
+        if (sheetTitle !== 'Balances')
+        {
+            // for some banks the amount are reversed
+            data = data.map(row => {
+                if (row[1] != 'amount')
+                {
+                    // @ts-ignore
+                    row[1] = (row[1])*-1
+                }
+                return row
+            })
+
+            data = this.reuseSavedCategories(data, currentSheetData)
+        }
+      
         await this.clearRanges([range])
         return this.updateRanges([{ range, data }])
     }
@@ -370,5 +404,29 @@ export class GoogleIntegration {
 
         logInfo('You can view your sheet here:\n')
         console.log(`https://docs.google.com/spreadsheets/d/${this.googleConfig.documentId}`)
+    }
+
+    /**
+     * Reuse categories already filled in the given sheet (allow the user to manually correct categories)
+     * @param data transaction data retrieved from bank
+     * @param currentSheetData data already filled in the google spreadsheet
+     * @returns original data enhanced with categories set manually
+     */
+    private reuseSavedCategories(data, currentSheetData){
+        for (let row of data)
+        {
+            for (let i = 1; i < currentSheetData.length; i++)
+            {
+                let currentSheetRow = currentSheetData[i]
+                if (row[0] == currentSheetRow[0] && Number(row[1]) == Number(currentSheetRow[1].replace(/\$|€/g, '')) && row[2] == currentSheetRow[2] && row[3] == currentSheetRow[3])
+                {
+                    if (currentSheetRow.length == 5 && currentSheetRow[4] != 'Non catégorisé')
+                    {
+                        row[4] = currentSheetRow[4]
+                    }
+                }
+            }
+        }        
+        return data
     }
 }
