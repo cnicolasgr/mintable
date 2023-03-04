@@ -117,8 +117,8 @@ export class PlaidIntegration {
 
             app.post('/create_link_token', async (req, res) => {
                 const clientUserId = this.user.client_user_id
-                const country_codes = process.env.COUNTRY_CODES ? process.env.COUNTRY_CODES.split(',') : ['US']
-                const language = process.env.LANGUAGE ? process.env.LANGUAGE : 'en'
+                const country_codes = process.env.COUNTRY_CODES ? process.env.COUNTRY_CODES.split(',') : ['FR']
+                const language = process.env.LANGUAGE ? process.env.LANGUAGE : 'fr'
                 const options: CreateLinkTokenOptions = {
                     user: {
                         client_user_id: clientUserId
