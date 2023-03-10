@@ -28,9 +28,9 @@ export interface Account {
 }
 
 export interface BaseAccountConfig {
-    id: string,
-    institution?: string,
-    name?: string,
+    id: string
+    institution?: string
+    name?: string
     integration: IntegrationId
 }
 
