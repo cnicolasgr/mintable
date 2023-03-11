@@ -154,6 +154,50 @@ export class GoogleIntegration {
             })
     }
 
+    public async reapplyTemplate()
+    {
+        const regexDate = /[0-9]+\.[0-9]+/;
+        let sheets = (await this.getSheets()).filter(value => regexDate.test(value.properties.title))
+
+        for (let sheet of sheets)
+        {
+            // copy template
+            const copied = await this.copySheet(
+                this.googleConfig.template.sheetTitle,
+                this.googleConfig.template.documentId
+            )    
+
+            // copy existing sheet values
+            const values = await this.sheets.values.get(
+            {
+                spreadsheetId: this.googleConfig.documentId,
+                range: sheet.properties.title
+            });
+
+            // update copied template sheet
+            const res = await this.sheets.values.update(
+            {
+                spreadsheetId: this.googleConfig.documentId,
+                range: copied.title,
+                valueInputOption: "USER_ENTERED",
+                requestBody: { values: values.data.values }
+            });
+
+            // delete old sheet
+            const del = await this.sheets.batchUpdate(
+            {
+                spreadsheetId: this.googleConfig.documentId,
+                requestBody: 
+                { 
+                    requests: [{deleteSheet: { sheetId: sheet.properties.sheetId }}]
+                }
+            });
+
+            // rename to original
+            this.renameSheet(copied.title, sheet.properties.title)
+        }
+    }
+
     public translateRange = (range: Range): string =>
         `'${range.sheet}'!${range.start.toUpperCase()}:${range.end.toUpperCase()}`
 

@@ -8,6 +8,7 @@ import google from '../integrations/google/setup'
 import csvImport from '../integrations/csv-import/setup'
 import csvExport from '../integrations/csv-export/setup'
 import accountSetup from '../integrations/plaid/accountSetup'
+import applyTemplate from '../integrations/google/applytemplate'
 import fetch from './fetch'
 import migrate from './migrate'
 import { logError } from '../common/logging'
@@ -43,7 +44,8 @@ import { logError } from '../common/logging'
         'account-setup': accountSetup,
         'google-setup': google,
         'csv-import-setup': csvImport,
-        'csv-export-setup': csvExport
+        'csv-export-setup': csvExport,
+        'reapply-template': applyTemplate
     }
 
     const arg = process.argv[2]
