@@ -166,22 +166,32 @@ export class GoogleIntegration {
                 this.googleConfig.template.sheetTitle,
                 this.googleConfig.template.documentId
             )    
-
-            // copy existing sheet values
-            const values = await this.sheets.values.get(
-            {
-                spreadsheetId: this.googleConfig.documentId,
-                range: sheet.properties.title
-            });
-
-            // update copied template sheet
-            const res = await this.sheets.values.update(
-            {
-                spreadsheetId: this.googleConfig.documentId,
-                range: copied.title,
-                valueInputOption: "USER_ENTERED",
-                requestBody: { values: values.data.values }
-            });
+           
+            // copy existing sheet values to new page
+            const test = await this.sheets.batchUpdate(
+                {
+                    spreadsheetId: this.googleConfig.documentId,
+                    requestBody: 
+                    { 
+                        requests: [
+                            {
+                                copyPaste: 
+                                {
+                                    pasteType: "PASTE_VALUES",
+                                    source: { 
+                                        sheetId: sheet.properties.sheetId,
+                                        endColumnIndex: 10
+                                     },
+                                    destination: { 
+                                        sheetId: copied.sheetId,
+                                        endColumnIndex: 10
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            );
 
             // delete old sheet
             const del = await this.sheets.batchUpdate(
